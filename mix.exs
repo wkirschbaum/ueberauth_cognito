@@ -33,7 +33,7 @@ defmodule UeberauthCognito.MixProject do
       {:jason, "~> 1.0"},
       {:jose, "~> 1.0"},
       {:ueberauth, "~> 0.7"},
-      {:ex_doc, "~> 0.26.0", only: :dev, runtime: false}
+      {:ex_doc, "~> 0.38", only: :dev, runtime: false}
     ]
   end
 
