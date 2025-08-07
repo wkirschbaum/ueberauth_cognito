@@ -34,11 +34,7 @@ defmodule Ueberauth.Strategy.Cognito do
   Handle the request step of the strategy.
   """
   def handle_request!(conn) do
-    %{
-      auth_domain: auth_domain,
-      client_id: client_id,
-      scope: scope
-    } = Config.get_config(conn)
+    config = Config.get_config(conn)
 
     optional_params =
       @accepted_authorize_params
@@ -53,13 +49,15 @@ defmodule Ueberauth.Strategy.Cognito do
       Keyword.merge(
         optional_params,
         response_type: "code",
-        client_id: client_id,
+        client_id: config.client_id,
         redirect_uri: callback_url(conn),
-        scope: scope || "openid profile email"
+        scope: config.scope || "openid profile email",
+        identity_provider: conn.params["identity_provider"],
+        login_hint: conn.params["login_hint"]
       )
       |> with_state_param(conn)
 
-    url = "https://#{auth_domain}/oauth2/authorize?" <> URI.encode_query(params)
+    url = "https://#{config.auth_domain}/oauth2/authorize?" <> URI.encode_query(params)
 
     conn
     |> redirect!(url)
