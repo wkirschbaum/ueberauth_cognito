@@ -1,3 +1,5 @@
+⚠️ This repo is longer maintained. Use this fork instead: [wkirschbaum/ueberauth_cognito](https://github.com/wkirschbaum/ueberauth_cognito)
+
 # Ueberauth Cognito
 
 [![Build Status](https://github.com/mbta/ueberauth_cognito/actions/workflows/elixir.yml/badge.svg?branch=master)](https://github.com/mbta/ueberauth_cognito/actions/workflows/elixir.yml)
