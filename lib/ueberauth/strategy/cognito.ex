@@ -28,7 +28,7 @@ defmodule Ueberauth.Strategy.Cognito do
   alias Ueberauth.Strategy.Cognito.Utilities
   alias Ueberauth.Strategy.Cognito.Config
 
-  @accepted_authorize_params [:identity_provider, :idp_identifier]
+  @accepted_authorize_params [:identity_provider, :idp_identifier, :login_hint]
 
   @doc """
   Handle the request step of the strategy.
@@ -51,9 +51,7 @@ defmodule Ueberauth.Strategy.Cognito do
         response_type: "code",
         client_id: config.client_id,
         redirect_uri: callback_url(conn),
-        scope: config.scope || "openid profile email",
-        identity_provider: conn.params["identity_provider"],
-        login_hint: conn.params["login_hint"]
+        scope: config.scope || "openid profile email"
       )
       |> with_state_param(conn)
 

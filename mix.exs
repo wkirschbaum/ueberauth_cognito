@@ -1,8 +1,8 @@
 defmodule UeberauthCognito.MixProject do
   use Mix.Project
 
-  @source_url "https://github.com/mbta/ueberauth_cognito"
-  @version "0.4.0"
+  @source_url "https://github.com/wkirschbaum/ueberauth_cognito"
+  @version "0.5.0"
 
   def project do
     [
@@ -41,8 +41,7 @@ defmodule UeberauthCognito.MixProject do
     [
       licenses: ["MIT"],
       maintainers: [
-        "Gabe Durazo <gdurazo@mbta.com>",
-        "Eddie Maldonado <emaldonado@mbta.com>"
+        "Wilhelm Kirschbaum <wkirschbaum@gmail.com>"
       ],
       links: %{
         "Changelog" => "https://hexdocs.pm/ueberauth_cognito/changelog.html",
@@ -60,7 +59,7 @@ defmodule UeberauthCognito.MixProject do
       ],
       main: "readme",
       source_url: @source_url,
-      source_ref: "#{@version}",
+      source_ref: "v#{@version}",
       formatters: ["html"]
     ]
   end

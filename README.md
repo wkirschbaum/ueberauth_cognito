@@ -1,6 +1,6 @@
 # Ueberauth Cognito
 
-[![Build Status](https://github.com/mbta/ueberauth_cognito/actions/workflows/elixir.yml/badge.svg?branch=master)](https://github.com/mbta/ueberauth_cognito/actions/workflows/elixir.yml)
+[![Build Status](https://github.com/wkirschbaum/ueberauth_cognito/actions/workflows/elixir.yml/badge.svg?branch=master)](https://github.com/wkirschbaum/ueberauth_cognito/actions/workflows/elixir.yml)
 
 > An Ueberauth Strategy for AWS Cognito.
 
@@ -13,7 +13,7 @@ defp deps do
   [
     # ...
     {:ueberauth, "~> 0.7"},
-    {:ueberauth_cognito, "~> 0.3"}
+    {:ueberauth_cognito, "~> 0.5"}
   ]
 end
 ```
