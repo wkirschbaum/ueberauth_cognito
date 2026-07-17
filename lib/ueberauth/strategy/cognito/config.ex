@@ -34,7 +34,7 @@ defmodule Ueberauth.Strategy.Cognito.Config do
 
     strategy_config =
       Map.new(@strategy_keys, fn c ->
-        {c, config_value(Keyword.get(options, c)) || config_value(config[c])}
+        {c, config_value(Keyword.get(options, c), c) || config_value(config[c], c)}
       end)
 
     dependency_config = %{
@@ -49,7 +49,7 @@ defmodule Ueberauth.Strategy.Cognito.Config do
 
     optional_config =
       Map.new(@optional_keys, fn c ->
-        {c, config_value(Keyword.get(options, c)) || config_value(config[c])}
+        {c, config_value(Keyword.get(options, c), c) || config_value(config[c], c)}
       end)
 
     overall_config =
@@ -68,13 +68,14 @@ defmodule Ueberauth.Strategy.Cognito.Config do
     end
   end
 
-  defp config_value(value) when is_binary(value) or is_nil(value), do: value
-  defp config_value({m, f, a}), do: apply(m, f, a)
-  defp config_value(value) when is_atom(value), do: Atom.to_string(value)
+  defp config_value(value, _key) when is_binary(value) or is_nil(value), do: value
+  defp config_value({m, f, a}, key), do: config_value(apply(m, f, a), key)
+  defp config_value(value, _key) when is_atom(value), do: Atom.to_string(value)
 
-  defp config_value(value) do
+  # don't include the value itself in the message: it may be a secret
+  defp config_value(_value, key) do
     raise ArgumentError,
-          "unsupported Ueberauth.Strategy.Cognito configuration value: #{inspect(value)}. " <>
+          "unsupported value type for Ueberauth.Strategy.Cognito configuration key #{inspect(key)}. " <>
             "Expected a string, an atom, or an {module, function, args} tuple."
   end
 end
