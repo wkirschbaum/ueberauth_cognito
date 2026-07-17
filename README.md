@@ -155,4 +155,8 @@ defmodule SignsUiWeb.AuthController do
 
 Copyright (c) 2019 Massachusetts Bay Transportation Authority
 
+Copyright (c) 2021-2026 Wilhelm Kirschbaum
+
+This project was originally developed by the [MBTA](https://github.com/mbta) and is now maintained here.
+
 Source code licensed under [MIT License](./LICENSE.md).
