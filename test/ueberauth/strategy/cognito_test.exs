@@ -5,14 +5,6 @@ defmodule Ueberauth.Strategy.CognitoTest do
 
   defmodule FakeHackneySuccess do
     def request(:post, _url, _headers, _body) do
-      {:ok, 200, [], :successful_post_ref}
-    end
-
-    def request(:get, "https://cognito-idp" <> _) do
-      {:ok, 200, [], :success_jwks}
-    end
-
-    def body(:successful_post_ref) do
       id_token_payload =
         %{
           "email" => "foo",
@@ -57,44 +49,28 @@ defmodule Ueberauth.Strategy.CognitoTest do
         "refresh_token" => "a_refresh_token"
       }
 
-      {:ok, Jason.encode!(token)}
+      {:ok, 200, [], Jason.encode!(token)}
     end
 
-    def body(:success_jwks) do
-      {:ok, Jason.encode!(%{})}
+    def request(:get, "https://cognito-idp" <> _) do
+      {:ok, 200, [], Jason.encode!(%{})}
     end
   end
 
   defmodule FakeHackneyError do
     def request(_method, _url, _headers, _body) do
-      {:ok, 403, [], :error_ref}
-    end
-
-    def body(:error_ref) do
-      {:ok, ""}
+      {:ok, 403, [], ""}
     end
   end
 
   defmodule FakeHackneyNonJsonSuccess do
     def request(:post, _url, _headers, _body) do
-      {:ok, 200, [], :non_json_ref}
-    end
-
-    def body(:non_json_ref) do
-      {:ok, "<html>not json</html>"}
+      {:ok, 200, [], "<html>not json</html>"}
     end
   end
 
   defmodule FakeHackneyJwkError do
     def request(:post, _url, _headers, _body) do
-      {:ok, 200, [], :successful_post_ref}
-    end
-
-    def request(:get, "https://cognito-idp" <> _) do
-      {:ok, 404, [], :failure_jwks}
-    end
-
-    def body(:successful_post_ref) do
       id_token_payload =
         %{"email" => "foo"}
         |> Jason.encode!()
@@ -107,11 +83,11 @@ defmodule Ueberauth.Strategy.CognitoTest do
         "id_token" => id_token
       }
 
-      {:ok, Jason.encode!(token)}
+      {:ok, 200, [], Jason.encode!(token)}
     end
 
-    def body(:failure_jwks) do
-      {:ok, ""}
+    def request(:get, "https://cognito-idp" <> _) do
+      {:ok, 404, [], ""}
     end
   end
 

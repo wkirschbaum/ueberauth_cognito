@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v0.6.0 (2026-07-17)
+
+- BREAKING: upgraded hackney from 1.x to 4.x. hackney 4 requires OTP 27+, so
+  the minimum supported Elixir version is now 1.17 (the first release that
+  supports OTP 27). Apps that depend on other packages pinned to hackney 1.x
+  (e.g. httpoison 2.x) need to upgrade those alongside this release.
+- If you inject a custom `http_client` for testing, note that `request/2,4`
+  now returns the response body directly as `{:ok, status, headers, body}`
+  and `body/1` is no longer called.
+
 ## v0.5.0 (2026-07-17)
 
 This is the first release from [wkirschbaum/ueberauth_cognito](https://github.com/wkirschbaum/ueberauth_cognito), which is now the maintained home of this package (previously mbta/ueberauth_cognito).

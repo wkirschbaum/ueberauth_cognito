@@ -14,15 +14,12 @@ defmodule Ueberauth.Strategy.Cognito.IntegrationTest do
 
   defmodule FakeHackney do
     def request(:post, "https://testdomain.com/oauth2/token", _headers, _body) do
-      {:ok, 200, [], :token_ref}
+      {:ok, 200, [], Application.get_env(:ueberauth_cognito_test, :token_body)}
     end
 
     def request(:get, "https://cognito-idp" <> _) do
-      {:ok, 200, [], :jwks_ref}
+      {:ok, 200, [], Application.get_env(:ueberauth_cognito_test, :jwks_body)}
     end
-
-    def body(:token_ref), do: {:ok, Application.get_env(:ueberauth_cognito_test, :token_body)}
-    def body(:jwks_ref), do: {:ok, Application.get_env(:ueberauth_cognito_test, :jwks_body)}
   end
 
   defmodule Router do

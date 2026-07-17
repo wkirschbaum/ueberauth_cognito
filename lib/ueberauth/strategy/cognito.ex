@@ -130,7 +130,7 @@ defmodule Ueberauth.Strategy.Cognito do
         Utilities.jwk_url_prefix(config) <> "/.well-known/jwks.json"
       )
 
-    case process_json_response(response, config.http_client) do
+    case process_json_response(response) do
       {:ok, decoded_json} -> {:ok, decoded_json}
       {:error, _} -> {:error, :cannot_fetch_jwks}
     end
@@ -146,7 +146,7 @@ defmodule Ueberauth.Strategy.Cognito do
 
     response = post_to_token_endpoint(params, config)
 
-    case process_json_response(response, config.http_client) do
+    case process_json_response(response) do
       {:ok, decoded_json} -> {:ok, decoded_json}
       {:error, _} -> {:error, :cannot_fetch_tokens}
     end
@@ -166,19 +166,12 @@ defmodule Ueberauth.Strategy.Cognito do
     )
   end
 
-  defp process_json_response(response, http_client) do
-    with {:ok, 200, _headers, client_ref} <- response,
-         {:ok, body} <- http_client.body(client_ref),
+  defp process_json_response(response) do
+    with {:ok, 200, _headers, body} <- response,
          {:ok, decoded_json} <- Jason.decode(body) do
       {:ok, decoded_json}
     else
-      {:ok, _status, _headers, client_ref} ->
-        # drain the body so hackney can return the connection to the pool
-        http_client.body(client_ref)
-        {:error, :invalid_response}
-
-      _ ->
-        {:error, :invalid_response}
+      _ -> {:error, :invalid_response}
     end
   end
 

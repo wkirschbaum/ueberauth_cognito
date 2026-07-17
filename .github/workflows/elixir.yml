@@ -12,9 +12,8 @@ jobs:
         # All Elixir versions currently receiving security patches, each
         # paired with a supported OTP release:
         # https://hexdocs.pm/elixir/compatibility-and-deprecations.html
+        # hackney 4.x requires OTP 27+, so 1.17/OTP 27 is the floor.
         include:
-          - elixir: "1.16"
-            otp: "26"
           - elixir: "1.17"
             otp: "27"
           - elixir: "1.18"
