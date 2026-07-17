@@ -1,7 +1,7 @@
 # MIT License
 
 Copyright (c) 2019 Massachusetts Bay Transportation Authority
-Copyright (c) 2021-2026 Wilhelm Kirschbaum
+Copyright (c) 2026 Wilhelm Kirschbaum
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
