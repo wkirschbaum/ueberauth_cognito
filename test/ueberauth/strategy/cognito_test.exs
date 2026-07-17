@@ -75,6 +75,16 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
   end
 
+  defmodule FakeHackneyNonJsonSuccess do
+    def request(:post, _url, _headers, _body) do
+      {:ok, 200, [], :non_json_ref}
+    end
+
+    def body(:non_json_ref) do
+      {:ok, "<html>not json</html>"}
+    end
+  end
+
   defmodule FakeHackneyJwkError do
     def request(:post, _url, _headers, _body) do
       {:ok, 200, [], :successful_post_ref}
@@ -210,6 +220,63 @@ defmodule Ueberauth.Strategy.CognitoTest do
                  errors: [
                    %Ueberauth.Failure.Error{
                      message_key: "no_code"
+                   }
+                 ]
+               }
+             } = conn.assigns
+    end
+
+    test "returns the OAuth error if the callback contains one" do
+      conn =
+        conn(:get, "/auth/cognito/callback?error=invalid_request&error_description=Bad%20scope")
+        |> init_test_session(%{})
+        |> Plug.Conn.fetch_query_params()
+        |> Cognito.handle_callback!()
+
+      assert %{
+               ueberauth_failure: %Ueberauth.Failure{
+                 errors: [
+                   %Ueberauth.Failure.Error{
+                     message_key: "invalid_request",
+                     message: "Bad scope"
+                   }
+                 ]
+               }
+             } = conn.assigns
+    end
+
+    test "returns the OAuth error if the callback contains one without a description" do
+      conn =
+        conn(:get, "/auth/cognito/callback?error=access_denied")
+        |> init_test_session(%{})
+        |> Plug.Conn.fetch_query_params()
+        |> Cognito.handle_callback!()
+
+      assert %{
+               ueberauth_failure: %Ueberauth.Failure{
+                 errors: [
+                   %Ueberauth.Failure.Error{
+                     message_key: "access_denied"
+                   }
+                 ]
+               }
+             } = conn.assigns
+    end
+
+    test "returns error if AWS responds with a 200 that is not JSON" do
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneyNonJsonSuccess)
+
+      conn =
+        conn(:get, "/auth/cognito/callback?state=123&code=abc")
+        |> init_test_session(%{})
+        |> Plug.Conn.fetch_query_params()
+        |> Cognito.handle_callback!()
+
+      assert %{
+               ueberauth_failure: %Ueberauth.Failure{
+                 errors: [
+                   %Ueberauth.Failure.Error{
+                     message_key: "aws_response"
                    }
                  ]
                }

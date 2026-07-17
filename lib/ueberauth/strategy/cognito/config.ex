@@ -57,12 +57,24 @@ defmodule Ueberauth.Strategy.Cognito.Config do
       |> Map.merge(strategy_config)
       |> Map.merge(dependency_config)
 
-    struct(
-      __MODULE__,
-      overall_config
-    )
+    case Enum.filter(@strategy_keys, &is_nil(overall_config[&1])) do
+      [] ->
+        struct(__MODULE__, overall_config)
+
+      missing ->
+        raise ArgumentError,
+              "missing required Ueberauth.Strategy.Cognito configuration: " <>
+                Enum.map_join(missing, ", ", &inspect/1)
+    end
   end
 
   defp config_value(value) when is_binary(value) or is_nil(value), do: value
   defp config_value({m, f, a}), do: apply(m, f, a)
+  defp config_value(value) when is_atom(value), do: Atom.to_string(value)
+
+  defp config_value(value) do
+    raise ArgumentError,
+          "unsupported Ueberauth.Strategy.Cognito configuration value: #{inspect(value)}. " <>
+            "Expected a string, an atom, or an {module, function, args} tuple."
+  end
 end

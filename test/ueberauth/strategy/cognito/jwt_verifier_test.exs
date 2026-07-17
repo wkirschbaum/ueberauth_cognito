@@ -167,7 +167,7 @@ defmodule Ueberauth.Strategy.Cognito.JwtVerifierTest do
                )
     end
 
-    test "doesn't verify when the token_use is not 'id' or 'access'" do
+    test "doesn't verify when the token_use is not 'id'" do
       rsa_private_jwk = JOSE.JWK.from_pem(@test_private_key_1)
       rsa_public_jwk = JOSE.JWK.to_public(rsa_private_jwk)
 
@@ -182,6 +182,62 @@ defmodule Ueberauth.Strategy.Cognito.JwtVerifierTest do
                Ueberauth.Strategy.Cognito.JwtVerifier.verify(
                  signed_jwt,
                  %{"keys" => [rsa_public_jwk]},
+                 @config
+               )
+    end
+
+    test "doesn't verify an access token where an id token is expected" do
+      rsa_private_jwk = JOSE.JWK.from_pem(@test_private_key_1)
+      rsa_public_jwk = JOSE.JWK.to_public(rsa_private_jwk)
+
+      jws = valid_jws()
+      jwt = %{valid_jwt() | "token_use" => "access"}
+
+      {_algo_meta, signed_jwt} =
+        JOSE.JWT.sign(rsa_private_jwk, jws, jwt)
+        |> JOSE.JWS.compact()
+
+      assert {:error, :invalid_jwt} ==
+               Ueberauth.Strategy.Cognito.JwtVerifier.verify(
+                 signed_jwt,
+                 %{"keys" => [rsa_public_jwk]},
+                 @config
+               )
+    end
+
+    test "doesn't verify a JWT without an exp claim" do
+      rsa_private_jwk = JOSE.JWK.from_pem(@test_private_key_1)
+      rsa_public_jwk = JOSE.JWK.to_public(rsa_private_jwk)
+
+      jws = valid_jws()
+      jwt = Map.delete(valid_jwt(), "exp")
+
+      {_algo_meta, signed_jwt} =
+        JOSE.JWT.sign(rsa_private_jwk, jws, jwt)
+        |> JOSE.JWS.compact()
+
+      assert {:error, :invalid_jwt} ==
+               Ueberauth.Strategy.Cognito.JwtVerifier.verify(
+                 signed_jwt,
+                 %{"keys" => [rsa_public_jwk]},
+                 @config
+               )
+    end
+
+    test "doesn't verify when the JWKs are not in the expected shape" do
+      rsa_private_jwk = JOSE.JWK.from_pem(@test_private_key_1)
+
+      {_algo_meta, signed_jwt} =
+        JOSE.JWT.sign(rsa_private_jwk, valid_jws(), valid_jwt())
+        |> JOSE.JWS.compact()
+
+      assert {:error, :invalid_jwt} ==
+               Ueberauth.Strategy.Cognito.JwtVerifier.verify(signed_jwt, %{}, @config)
+
+      assert {:error, :invalid_jwt} ==
+               Ueberauth.Strategy.Cognito.JwtVerifier.verify(
+                 signed_jwt,
+                 %{"keys" => "garbage"},
                  @config
                )
     end

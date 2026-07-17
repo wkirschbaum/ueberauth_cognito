@@ -81,10 +81,9 @@ defmodule Ueberauth.Strategy.Cognito do
     end
   end
 
-  defp exchange_code_for_token(
-         %Plug.Conn{params: %{"error_description" => description, "error" => error}} = conn
-       ) do
-    set_errors!(conn, error(error, description))
+  # error_description is optional in OAuth error responses
+  defp exchange_code_for_token(%Plug.Conn{params: %{"error" => error} = params} = conn) do
+    set_errors!(conn, error(error, params["error_description"] || error))
   end
 
   defp exchange_code_for_token(conn) do
@@ -157,9 +156,14 @@ defmodule Ueberauth.Strategy.Cognito do
   defp process_json_response(response, http_client) do
     with {:ok, 200, _headers, client_ref} <- response,
          {:ok, body} <- http_client.body(client_ref),
-         decoded_json <- Jason.decode!(body) do
+         {:ok, decoded_json} <- Jason.decode(body) do
       {:ok, decoded_json}
     else
+      {:ok, _status, _headers, client_ref} ->
+        # drain the body so hackney can return the connection to the pool
+        http_client.body(client_ref)
+        {:error, :invalid_response}
+
       _ ->
         {:error, :invalid_response}
     end
