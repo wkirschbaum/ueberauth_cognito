@@ -40,6 +40,16 @@ config :ueberauth, Ueberauth.Strategy.Cognito,
 
 The values can be configured with an MFA, or simply a string.
 
+The following optional values can be configured in the same way:
+
+```elixir
+config :ueberauth, Ueberauth.Strategy.Cognito,
+  # ... required values ...
+  scope: "openid profile email", # OAuth scopes to request (this is the default)
+  uid_field: "sub",              # id token claim used for `auth.uid` (default: "cognito:username")
+  name_field: "name"             # id token claim used for `auth.info.name` (default: "name")
+```
+
 Add the routes to the router:
 
 ```elixir
@@ -70,6 +80,44 @@ end
 ```
 
 Note that the entry in the `router` defines the authentication callback URL, and will need to be whitelisted in the AWS Cognito User Pools settings.
+
+## Request parameters
+
+The request phase passes the following query parameters through to Cognito's `/oauth2/authorize` endpoint when present, so you can send users to a specific identity provider or pre-fill their username:
+
+```
+/auth/cognito?identity_provider=Google
+/auth/cognito?idp_identifier=my-idp
+/auth/cognito?login_hint=user@example.com
+```
+
+## Multiple Cognito providers
+
+To authenticate against more than one user pool (for example separate staff and customer pools), define multiple providers with the Cognito strategy and pass each one its configuration as options:
+
+```elixir
+config :ueberauth, Ueberauth,
+  providers: [
+    staff: {Ueberauth.Strategy.Cognito, [
+      auth_domain: "staff.auth.example.com",
+      client_id: {System, :get_env, ["STAFF_COGNITO_CLIENT_ID"]},
+      client_secret: {System, :get_env, ["STAFF_COGNITO_CLIENT_SECRET"]},
+      user_pool_id: "eu-west-1_staff",
+      aws_region: "eu-west-1"
+    ]},
+    customers: {Ueberauth.Strategy.Cognito, [
+      auth_domain: "customers.auth.example.com",
+      client_id: {System, :get_env, ["CUSTOMER_COGNITO_CLIENT_ID"]},
+      client_secret: {System, :get_env, ["CUSTOMER_COGNITO_CLIENT_SECRET"]},
+      user_pool_id: "eu-west-1_customers",
+      aws_region: "eu-west-1"
+    ]}
+  ]
+```
+
+Each provider gets its own routes (`/auth/staff`, `/auth/customers` above), and `auth.provider` in the callback tells you which one authenticated.
+
+Provider options take precedence key by key: any value not given in a provider's options falls back to the shared `config :ueberauth, Ueberauth.Strategy.Cognito` configuration, so values common to all pools only need to be set once.
 
 ## Configuration of settings per OTP app
 

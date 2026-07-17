@@ -11,8 +11,21 @@ defmodule Ueberauth.Strategy.Cognito do
   * `user_pool_id`
   * `aws_region`
 
-  These should all be available from your AWS Cognito setup. Additionally, there are a
-  couple of options specifying what modules to use for some particular functions:
+  These should all be available from your AWS Cognito setup, and are required. The
+  following keys are optional:
+
+  * `scope` - the OAuth scopes to request (defaults to `"openid profile email"`)
+  * `uid_field` - the id token claim used for `auth.uid` (defaults to `"cognito:username"`)
+  * `name_field` - the id token claim used for `auth.info.name` (defaults to `"name"`)
+
+  Each value can be a string, an atom, or an `{module, function, args}` tuple resolved
+  at runtime. Configuration can be set globally under
+  `config :ueberauth, Ueberauth.Strategy.Cognito`, or per provider by passing the
+  options in the provider tuple, which allows multiple Cognito providers backed by
+  different user pools (see the README).
+
+  Additionally, there are a couple of options specifying what modules to use for some
+  particular functions:
 
   * `http_client`
   * `jwt_verifier`
