@@ -16,7 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Mint).
 - If you inject a custom `http_client` for testing, note that `request/2,4`
   must now return the response body directly as `{:ok, status, headers, body}`;
-  `body/1` is no longer called.
+  `body/1` is no longer called. The contract is defined as a behaviour on
+  `Ueberauth.Strategy.Cognito.HttpClient`.
+- The bundled client enforces an overall request deadline (30 seconds by
+  default, configurable with `config :ueberauth_cognito, request_timeout: ms`).
+- Failed token/JWKS requests now report the cause (HTTP status, transport
+  error, or invalid JSON) in the Ueberauth error message instead of a generic
+  "Non-200 error code from AWS".
 
 ## v0.5.0 (2026-07-17)
 

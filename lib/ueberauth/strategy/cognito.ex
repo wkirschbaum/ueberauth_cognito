@@ -89,8 +89,8 @@ defmodule Ueberauth.Strategy.Cognito do
     with {:ok, token} <- request_token(conn, code, config) do
       extract_and_verify_token(conn, token, config)
     else
-      {:error, :cannot_fetch_tokens} ->
-        set_errors!(conn, error("aws_response", "Non-200 error code from AWS"))
+      {:error, {:cannot_fetch_tokens, reason}} ->
+        set_errors!(conn, error("aws_response", "Could not fetch token: " <> describe(reason)))
     end
   end
 
@@ -115,8 +115,8 @@ defmodule Ueberauth.Strategy.Cognito do
       |> put_private(:cognito_token, token)
       |> put_private(:cognito_id_token, id_token)
     else
-      {:error, :cannot_fetch_jwks} ->
-        set_errors!(conn, error("jwks_response", "Error fetching JWKs"))
+      {:error, {:cannot_fetch_jwks, reason}} ->
+        set_errors!(conn, error("jwks_response", "Could not fetch JWKs: " <> describe(reason)))
 
       {:error, :invalid_jwt} ->
         set_errors!(conn, error("bad_id_token", "Could not validate JWT id_token"))
@@ -132,7 +132,7 @@ defmodule Ueberauth.Strategy.Cognito do
 
     case process_json_response(response) do
       {:ok, decoded_json} -> {:ok, decoded_json}
-      {:error, _} -> {:error, :cannot_fetch_jwks}
+      {:error, reason} -> {:error, {:cannot_fetch_jwks, reason}}
     end
   end
 
@@ -148,7 +148,7 @@ defmodule Ueberauth.Strategy.Cognito do
 
     case process_json_response(response) do
       {:ok, decoded_json} -> {:ok, decoded_json}
-      {:error, _} -> {:error, :cannot_fetch_tokens}
+      {:error, reason} -> {:error, {:cannot_fetch_tokens, reason}}
     end
   end
 
@@ -167,13 +167,29 @@ defmodule Ueberauth.Strategy.Cognito do
   end
 
   defp process_json_response(response) do
-    with {:ok, 200, _headers, body} <- response,
-         {:ok, decoded_json} <- Jason.decode(body) do
-      {:ok, decoded_json}
-    else
-      _ -> {:error, :invalid_response}
+    case response do
+      {:ok, 200, _headers, body} when is_binary(body) ->
+        case Jason.decode(body) do
+          {:ok, decoded_json} -> {:ok, decoded_json}
+          {:error, _} -> {:error, :invalid_json}
+        end
+
+      {:ok, status, _headers, _body} when is_integer(status) ->
+        {:error, {:http_status, status}}
+
+      {:error, reason} ->
+        {:error, {:transport, reason}}
+
+      _ ->
+        {:error, :invalid_response}
     end
   end
+
+  defp describe({:http_status, status}), do: "non-200 error code from AWS (#{status})"
+  defp describe({:transport, %{__exception__: true} = e}), do: Exception.message(e)
+  defp describe({:transport, reason}), do: inspect(reason)
+  defp describe(:invalid_json), do: "AWS responded with invalid JSON"
+  defp describe(_), do: "invalid response from AWS"
 
   @doc """
   Returns standard `Ueberauth.Auth.Credentials` struct. The `other` key will be a map

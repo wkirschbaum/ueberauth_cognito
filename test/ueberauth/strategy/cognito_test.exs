@@ -4,6 +4,8 @@ defmodule Ueberauth.Strategy.CognitoTest do
   alias Ueberauth.Strategy.Cognito
 
   defmodule FakeHttpClientSuccess do
+    @behaviour Ueberauth.Strategy.Cognito.HttpClient
+
     def request(:post, _url, _headers, _body) do
       id_token_payload =
         %{
@@ -58,18 +60,28 @@ defmodule Ueberauth.Strategy.CognitoTest do
   end
 
   defmodule FakeHttpClientError do
+    @behaviour Ueberauth.Strategy.Cognito.HttpClient
+
+    def request(_method, _url), do: {:ok, 403, [], ""}
+
     def request(_method, _url, _headers, _body) do
       {:ok, 403, [], ""}
     end
   end
 
   defmodule FakeHttpClientNonJsonSuccess do
+    @behaviour Ueberauth.Strategy.Cognito.HttpClient
+
+    def request(_method, _url), do: {:ok, 200, [], "<html>not json</html>"}
+
     def request(:post, _url, _headers, _body) do
       {:ok, 200, [], "<html>not json</html>"}
     end
   end
 
   defmodule FakeHttpClientJwkError do
+    @behaviour Ueberauth.Strategy.Cognito.HttpClient
+
     def request(:post, _url, _headers, _body) do
       id_token_payload =
         %{"email" => "foo"}

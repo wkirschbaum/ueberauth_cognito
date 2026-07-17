@@ -13,6 +13,8 @@ defmodule Ueberauth.Strategy.Cognito.IntegrationTest do
   use Plug.Test
 
   defmodule FakeHttpClient do
+    @behaviour Ueberauth.Strategy.Cognito.HttpClient
+
     def request(:post, "https://testdomain.com/oauth2/token", _headers, _body) do
       {:ok, 200, [], Application.get_env(:ueberauth_cognito_test, :token_body)}
     end
