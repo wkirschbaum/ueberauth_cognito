@@ -10,9 +10,7 @@ defmodule UeberauthCognito.MixProject do
       name: "Ueberauth Cognito",
       source_url: @source_url,
       version: @version,
-      # hackney 4.x requires OTP 27+, and Elixir 1.17 is the first release
-      # that supports OTP 27.
-      elixir: "~> 1.17",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: LcovEx],
       description: "An Ueberauth strategy for integrating with AWS Cognito",
@@ -31,7 +29,8 @@ defmodule UeberauthCognito.MixProject do
   defp deps do
     [
       {:lcov_ex, "~> 0.2", only: [:dev, :test], runtime: false},
-      {:hackney, "~> 4.0"},
+      {:mint, "~> 1.9"},
+      {:castore, "~> 1.0"},
       {:jason, "~> 1.0"},
       {:jose, "~> 1.0"},
       {:ueberauth, "~> 0.7"},

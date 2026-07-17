@@ -12,7 +12,7 @@ defmodule Ueberauth.Strategy.Cognito.IntegrationTest do
   use ExUnit.Case
   use Plug.Test
 
-  defmodule FakeHackney do
+  defmodule FakeHttpClient do
     def request(:post, "https://testdomain.com/oauth2/token", _headers, _body) do
       {:ok, 200, [], Application.get_env(:ueberauth_cognito_test, :token_body)}
     end
@@ -57,7 +57,7 @@ defmodule Ueberauth.Strategy.Cognito.IntegrationTest do
       aws_region: @aws_region
     })
 
-    Application.put_env(:ueberauth_cognito, :__http_client, FakeHackney)
+    Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClient)
 
     Application.put_env(
       :ueberauth_cognito,

@@ -38,7 +38,12 @@ defmodule Ueberauth.Strategy.Cognito.Config do
       end)
 
     dependency_config = %{
-      http_client: Application.get_env(:ueberauth_cognito, :__http_client, :hackney),
+      http_client:
+        Application.get_env(
+          :ueberauth_cognito,
+          :__http_client,
+          Ueberauth.Strategy.Cognito.HttpClient
+        ),
       jwt_verifier:
         Application.get_env(
           :ueberauth_cognito,

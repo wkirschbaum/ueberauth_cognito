@@ -3,7 +3,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
   use Plug.Test
   alias Ueberauth.Strategy.Cognito
 
-  defmodule FakeHackneySuccess do
+  defmodule FakeHttpClientSuccess do
     def request(:post, _url, _headers, _body) do
       id_token_payload =
         %{
@@ -57,19 +57,19 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
   end
 
-  defmodule FakeHackneyError do
+  defmodule FakeHttpClientError do
     def request(_method, _url, _headers, _body) do
       {:ok, 403, [], ""}
     end
   end
 
-  defmodule FakeHackneyNonJsonSuccess do
+  defmodule FakeHttpClientNonJsonSuccess do
     def request(:post, _url, _headers, _body) do
       {:ok, 200, [], "<html>not json</html>"}
     end
   end
 
-  defmodule FakeHackneyJwkError do
+  defmodule FakeHttpClientJwkError do
     def request(:post, _url, _headers, _body) do
       id_token_payload =
         %{"email" => "foo"}
@@ -166,7 +166,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
 
   describe "handle_callback!" do
     test "puts token information in conn if successful response from AWS" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneySuccess)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientSuccess)
 
       conn =
         conn(:get, "/auth/cognito/callback?state=123&code=abc")
@@ -240,7 +240,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
 
     test "returns error if AWS responds with a 200 that is not JSON" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneyNonJsonSuccess)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientNonJsonSuccess)
 
       conn =
         conn(:get, "/auth/cognito/callback?state=123&code=abc")
@@ -260,7 +260,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
 
     test "returns error if AWS responds with a non-200 for JWT" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneyError)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientError)
 
       conn =
         conn(:get, "/auth/cognito/callback?state=123&code=abc")
@@ -280,7 +280,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
 
     test "returns error if AWS responds with a non-200 for JWKs" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneyJwkError)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientJwkError)
 
       conn =
         conn(:get, "/auth/cognito/callback?state=123&code=abc")
@@ -300,7 +300,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
     end
 
     test "returns error if JWT verifier fails" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneySuccess)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientSuccess)
       Application.put_env(:ueberauth_cognito, :__jwt_verifier, FakeJwtVerifierFailure)
 
       conn =
@@ -403,7 +403,7 @@ defmodule Ueberauth.Strategy.CognitoTest do
 
   describe "info/1" do
     test "fills in info after callback" do
-      Application.put_env(:ueberauth_cognito, :__http_client, FakeHackneySuccess)
+      Application.put_env(:ueberauth_cognito, :__http_client, FakeHttpClientSuccess)
 
       conn =
         conn(:get, "/auth/cognito/callback")

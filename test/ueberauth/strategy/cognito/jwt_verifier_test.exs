@@ -67,7 +67,7 @@ defmodule Ueberauth.Strategy.Cognito.JwtVerifierTest do
     client_secret: "test_client_secret",
     user_pool_id: "user_pool_id",
     aws_region: "aws_region",
-    http_client: :hackney,
+    http_client: Ueberauth.Strategy.Cognito.HttpClient,
     jwt_verifier: Ueberauth.Strategy.Cognito.JwtVerifier
   }
 

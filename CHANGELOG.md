@@ -7,13 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.6.0 (2026-07-17)
 
-- BREAKING: upgraded hackney from 1.x to 4.x. hackney 4 requires OTP 27+, so
-  the minimum supported Elixir version is now 1.17 (the first release that
-  supports OTP 27). Apps that depend on other packages pinned to hackney 1.x
-  (e.g. httpoison 2.x) need to upgrade those alongside this release.
+- BREAKING: replaced hackney with a minimal Mint-based HTTP client
+  (`Ueberauth.Strategy.Cognito.HttpClient`). The library no longer depends on
+  hackney, so it can't conflict with whatever HTTP client your app uses; if
+  you relied on this library pulling hackney in transitively, add it to your
+  own deps.
+- BREAKING: the minimum supported Elixir version is now 1.15 (required by
+  Mint).
 - If you inject a custom `http_client` for testing, note that `request/2,4`
-  now returns the response body directly as `{:ok, status, headers, body}`
-  and `body/1` is no longer called.
+  must now return the response body directly as `{:ok, status, headers, body}`;
+  `body/1` is no longer called.
 
 ## v0.5.0 (2026-07-17)
 
