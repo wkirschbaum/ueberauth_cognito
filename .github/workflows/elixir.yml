@@ -24,7 +24,6 @@ jobs:
           - elixir: "1.20"
             otp: "29"
             lint: true
-            coverage: true
     steps:
       - uses: actions/checkout@v7
       - uses: erlef/setup-beam@v1
@@ -48,14 +47,3 @@ jobs:
         run: mix compile --force --warnings-as-errors
       - name: Run tests
         run: mix test --cover
-      - name: Save PR information
-        run: |
-          echo "${{ github.event.pull_request.number }}" > cover/PR_NUMBER
-          echo "${{ github.event.pull_request.head.sha }}" > cover/PR_SHA
-        if: matrix.coverage && github.event.pull_request
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: elixir-lcov
-          path: cover/
-        if: matrix.coverage
